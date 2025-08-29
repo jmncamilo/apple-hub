@@ -1,4 +1,7 @@
 .mainWrapper {
+  background: radial-gradient(circle at 20% 30%, #a7abe733 0%, transparent 40%),
+              radial-gradient(circle at 80% 70%, #f2b3df4f 0%, transparent 60%),
+              radial-gradient(circle at 50% 50%, #d1f0ff3f 0%, transparent 70%);
   width: 100%;
   height: 100%;
   display: flex;
@@ -10,15 +13,63 @@
 
 .loginBox {
   background-color: white;
-  min-width: 400px;
-  width: 45vw;
-  min-height: 400px;
-  height: 50vh;
+  min-width: 330px;
+  width: 33vw;
+  min-height: 500px;
+  height: 40vh;
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
   overflow: hidden;
   box-sizing: border-box;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 3px 25px rgba(0, 0, 0, 0.25);
+}
+
+.marginLoginBox {
+  width: 80%;
+  height: 90%;
+  background-color: rgba(102, 51, 153, 0.103);
+  background-color: transparent;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1.7rem;
+}
+
+.logoApp {
+  width: 100%;
+  height: auto;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  /* background-color: aqua; */
+}
+
+.titleH1 {
+  font-size: 1.4rem;
+  color: rgba(0, 0, 0, 0.65);
+  width: 100%;
+  text-align: left;
+}
+
+.inputLogin {
+  border: 0;
+  border-radius: 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+  background-color: transparent;
+  padding-left: 0;
+  transition: border 0.3s ease-in-out;
+  padding-top: 0.4rem;
+  padding-bottom: 0.4rem;
+
+  &:focus {
+    box-shadow: none;
+    border-bottom: 1.5px solid rgba(0, 0, 0, 0.65);
+  }
+}
+
+.marginLoginBox > button {
+  margin-top: 1rem;
 }

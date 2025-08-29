@@ -2,13 +2,13 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 
 const getInter = Inter({
-  variable: "--font-geist-sans",
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
 export const metadata = {
   title: "E-commerce",
-  description: "Lo que sea",
+  description: "E-commerce Apple Inc.",
 };
 
 export default function RootLayout({ children }) {
