@@ -2,7 +2,7 @@
   width: 100%;
   min-height: 100vh;
   /* background-color: rgb(206, 206, 206); */
-  background-color: #f6f6f6;
+  background-color: var(--bgDashboard);
   display: flex;
   justify-content: flex-start;
   align-items: center;
@@ -14,7 +14,7 @@
   width: clamp(4rem, 3.5vw, 8rem);
   height: 100vh;
   /* min-height: 500px; */
-  background-color: transparent;
+  background-color: var(--bgDashboard);
   position: sticky;
   top: 0;
   left: 0;
@@ -124,4 +124,5 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow: hidden;
 }
