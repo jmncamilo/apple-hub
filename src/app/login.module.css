@@ -16,7 +16,7 @@
   min-width: 330px;
   width: 33vw;
   min-height: 500px;
-  height: 40vh;
+  height: 48vh;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -48,7 +48,7 @@
 }
 
 .titleH1 {
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   color: rgba(0, 0, 0, 0.65);
   width: 100%;
   text-align: left;
@@ -57,7 +57,7 @@
 .inputLogin {
   border: 0;
   border-radius: 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.45);
   background-color: transparent;
   padding-left: 0;
   transition: border 0.3s ease-in-out;
@@ -66,10 +66,17 @@
 
   &:focus {
     box-shadow: none;
-    border-bottom: 1.5px solid rgba(0, 0, 0, 0.65);
+    border-bottom: 1.5px solid rgba(0, 0, 0, 0.77);
   }
 }
 
 .marginLoginBox > button {
   margin-top: 1rem;
+}
+
+.pLikeLink {
+  font-size: 1rem;
+  text-decoration: underline;
+  cursor: pointer;
+  color: #0f0f0f;
 }

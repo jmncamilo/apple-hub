@@ -10,8 +10,8 @@ export default function Login() {
             <Image
               src="/applehub-logo.png"
               alt="Logo de la aplicación"
-              width={150}
-              height={91}
+              width={155}
+              height={96}
             />
           </div>
           <h1 className={styles.titleH1}>Iniciar Sesión</h1>
@@ -26,6 +26,7 @@ export default function Login() {
             placeholder="Contraseña"
           />
           <button>Ingresar</button>
+          <p className={styles.pLikeLink}>¿No puedes iniciar sesión?</p>
         </div>
       </div>
     </div>

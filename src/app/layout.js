@@ -7,8 +7,11 @@ const getInter = Inter({
 });
 
 export const metadata = {
-  title: "E-commerce",
+  title: "Apple Hub",
   description: "E-commerce Apple Inc.",
+  icons: {
+    icon: '/favicon.ico?v=2'
+  }
 };
 
 export default function RootLayout({ children }) {
