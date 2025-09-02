@@ -21,7 +21,7 @@ export default function DashboardLayout({ children }) {
         <div className={styles.sidebarMainBox}>
           <div className={styles.iconsBoxAbove}>
             <div className={styles.boxForIcons}>
-              <Link className={`${styles.iconsLink} ${isActive('/dashboard/users') ? styles.isActiveModule : '' }`} href={"/dashboard/users"}>
+              <Link className={`${styles.iconsLink} ${isActive('/dashboard/customers') ? styles.isActiveModule : '' }`} href={"/dashboard/customers"}>
                 <UsersIcon className={`${styles.icons}`}/>
                 <span className={styles.tooltip}>Usuarios</span>
               </Link>

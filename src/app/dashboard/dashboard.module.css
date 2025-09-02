@@ -10,7 +10,7 @@
 }
 
 .sidebarMainBox {
-  width: 5rem;
+  min-width: 64px;
   width: clamp(4rem, 3.5vw, 8rem);
   height: 100vh;
   /* min-height: 500px; */
@@ -119,7 +119,7 @@
 .contentMainBox {
   flex-grow: 1;
   /* background-color: rgb(141, 37, 37); */
-  background-color: transparent;
+  background-color: inherit;
   height: 100vh;
   display: flex;
   justify-content: center;
