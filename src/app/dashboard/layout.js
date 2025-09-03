@@ -23,7 +23,7 @@ export default function DashboardLayout({ children }) {
             <div className={styles.boxForIcons}>
               <Link className={`${styles.iconsLink} ${isActive('/dashboard/customers') ? styles.isActiveModule : '' }`} href={"/dashboard/customers"}>
                 <UsersIcon className={`${styles.icons}`}/>
-                <span className={styles.tooltip}>Usuarios</span>
+                <span className={styles.tooltip}>Clientes</span>
               </Link>
             </div>
             <div className={styles.boxForIcons}>
