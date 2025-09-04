@@ -7,11 +7,16 @@ export function CustomerForm({ customer, registerForm = false, onClose, onSave }
           <h2 className="text-2xl font-bold text-gray-800">{registerForm ? 'Registrar Cliente' : 'Editar Cliente'}</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors !p-1 !min-h-0 !w-6 !h-6 !min-w-0 flex items-center justify-center"
+            className="text-gray-400 hover:text-gray-600 transition-colors !w-8 !h-8 !min-w-8 !min-h-8 !max-w-8 !max-h-8 !flex !items-center !justify-center !border-0 !outline-none !p-0 !m-0 !rounded-full"
+            style={{ 
+              borderRadius: '50%',
+              width: '32px',
+              height: '32px'
+            }}
           >
             <svg
-              width="14"
-              height="14"
+              width="18"
+              height="18"
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
