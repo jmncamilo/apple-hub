@@ -4,7 +4,7 @@
       id: 1,
       nuip: "1234567890",
       names: "Ana María",
-      lastnames: "Rodríguez Silva",
+      lastnames: "Rodríguez",
       email: "ana.rodriguez@email.com",
       age: 28,
       gender: "F",
@@ -183,3 +183,5 @@
       updated_at: "2025-08-31T17:50:39.456Z",
     },
   ];
+
+  export default customers;

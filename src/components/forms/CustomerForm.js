@@ -38,7 +38,7 @@ export function CustomerForm({ customer, registerForm = false, onClose, onSave }
             {/* NUIP */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Nuip
+                Documento de Identidad
               </label>
               <input
                 type="text"
