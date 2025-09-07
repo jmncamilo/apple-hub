@@ -1,12 +1,24 @@
 "use client";
 import { useState } from "react";
-import orders from "@/lib/random/mockApiOrders";
 import { OrderCard } from "@/components/cards/OrderCard";
 import { NewOrderView } from "@/components/views/NewOrderView";
 import { WarrantiesView } from "@/components/views/WarrantiesView";
 import { ReturnsView } from "@/components/views/ReturnsView";
+import { useFetch } from "@/hooks/useFetch";
+import Loader from "@/components/common/Loader";
 
 export default function DashboardOrders() {
+  // Usando estado para refrescar el fetch de los clientes
+  const [refreshUrl, setRefreshUrl] = useState(0);
+    // Función para setear valor y refrescar el fetch
+  const onRefresh = () => {
+    setRefreshUrl((prev) => prev + 1);
+  };
+
+  // Haciendo el fetching de datos para traernos las orders
+  const { data, error, isLoading } = useFetch(`/api/orders?upt=${refreshUrl}`);
+  const orders = data?.orders || [];
+
   const [activeModal, setActiveModal] = useState(null); // null, 'new', 'warranties', 'returns'
 
   return (
@@ -97,7 +109,7 @@ export default function DashboardOrders() {
       <div className="flex-1 overflow-auto bg-gray-50">
         <div className="p-6">
           {orders.map((item) => (
-            <OrderCard key={item.id} order={item} />
+            <OrderCard key={item.id} order={item} onRefresh={onRefresh} />
           ))}
         </div>
       </div>
@@ -105,7 +117,7 @@ export default function DashboardOrders() {
       {/* Overlays modales que ocupan todo el contenedor */}
       {activeModal === "new" && (
         <div className="absolute inset-0 bg-white z-50">
-          <NewOrderView onClose={() => setActiveModal(null)} />
+          <NewOrderView onClose={() => setActiveModal(null)} onRefresh={onRefresh} />
         </div>
       )}
 
@@ -120,6 +132,9 @@ export default function DashboardOrders() {
           <ReturnsView onClose={() => setActiveModal(null)} />
         </div>
       )}
+
+      {/* Componente loading */}
+      {<Loader isVisible={isLoading}/>}
     </div>
   );
 }

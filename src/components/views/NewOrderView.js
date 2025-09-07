@@ -1,16 +1,25 @@
 "use client";
 import { useState } from "react";
 import Image from "next/image";
-import mockCustomers from "@/lib/random/mockApiCustomers.js";
-import mockProducts from "@/lib/random/mockApiProducts";
+import { useFetch } from "@/hooks/useFetch";
+import Loader from "../common/Loader";
 
-export function NewOrderView({ onClose }) {
+export function NewOrderView({ onClose, onRefresh }) {
   // Estados para el formulario (solo para UI, sin lógica)
   const [selectedCustomer, setSelectedCustomer] = useState("");
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [orderItems, setOrderItems] = useState([
     { product_id: "", quantity: 1, unit_price: 0 },
   ]);
+
+  // Fetching para traer producto
+  const {
+    data: customers,
+    isLoading,
+    error: customersError,
+  } = useFetch("/api/customers");
+  const { data: products, isLoading: isLoadingProducts, error: productsError } = useFetch("/api/products");
+  const isAnyLoading = isLoading || isLoadingProducts;
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat("es-CO", {
@@ -38,6 +47,40 @@ export function NewOrderView({ onClose }) {
     return orderItems.reduce((total, item) => {
       return total + item.quantity * item.unit_price;
     }, 0);
+  };
+
+  // Crear la orden y enviar la petición POST
+  const handleCreateOrder = async (e) => {
+    e.preventDefault();
+
+    // Construyendo el objeto del pedido
+    const payload = {
+      customer_id: selectedCustomer,
+      delivery_address: deliveryAddress,
+      items: orderItems.map((item) => ({
+        product_id: item.product_id,
+        quantity: item.quantity,
+      })),
+    };
+
+    try {
+      const response = await fetch("/api/order-items", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const result = await response.json();
+
+      if (result.success) {
+        alert("Pedido creado correctamente");
+        onRefresh();
+        onClose(); // Cierra el modal o vista
+      } else {
+        alert(result.error || "No se pudo crear el pedido");
+      }
+    } catch (error) {
+      alert("Error de red al crear el pedido");
+    }
   };
 
   return (
@@ -131,8 +174,8 @@ export function NewOrderView({ onClose }) {
                       onChange={(e) => setSelectedCustomer(e.target.value)}
                       className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
-                      <option value="">Selecciona un cliente</option>
-                      {mockCustomers.map((customer) => (
+                      <option hidden value="">Selecciona un cliente</option>
+                      {customers?.customers?.map((customer) => (
                         <option key={customer.id} value={customer.id}>
                           {customer.names} {customer.lastnames} -{" "}
                           {customer.email}
@@ -203,7 +246,7 @@ export function NewOrderView({ onClose }) {
                         <select
                           value={item.product_id}
                           onChange={(e) => {
-                            const selectedProduct = mockProducts.find(
+                            const selectedProduct = products?.products?.find(
                               (p) => p.id === parseInt(e.target.value)
                             );
                             const newItems = [...orderItems];
@@ -218,10 +261,14 @@ export function NewOrderView({ onClose }) {
                           }}
                           className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                         >
-                          <option hidden value="">Selecciona un producto</option>
-                          {mockProducts.map((product) => (
+                          <option hidden value="">
+                            Selecciona un producto
+                          </option>
+                          {products?.products?.map((product) => (
                             <option key={product.id} value={product.id}>
-                              {product.product_name} - {formatPrice(product.price)} (Stock: {product.stock_quantity})
+                              {product.product_name} -{" "}
+                              {formatPrice(product.price)} (Stock:{" "}
+                              {product.stock_quantity})
                             </option>
                           ))}
                         </select>
@@ -352,8 +399,9 @@ export function NewOrderView({ onClose }) {
                   Cancelar
                 </button>
                 <button
-                  type="submit"
+                  type="button"
                   className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3 px-6 rounded-lg transition-colors font-semibold"
+                  onClick={handleCreateOrder}
                 >
                   Crear Pedido
                 </button>
@@ -362,6 +410,9 @@ export function NewOrderView({ onClose }) {
           </div>
         </div>
       </div>
+
+      {/* Modal loader */}
+      {<Loader isVisible={isAnyLoading} />}
     </div>
   );
 }

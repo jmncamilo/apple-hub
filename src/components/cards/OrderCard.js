@@ -1,8 +1,54 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { patchOptions } from "@/lib/utils/optionsFetch";
 
-export function OrderCard({ order }) {
+export function OrderCard({ order, onRefresh }) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [orderStatus, setOrderStatus] = useState(order.status);
+
+  // Agregando estado para los items
+  const [itemStatuses, setItemStatuses] = useState(
+    order.order_items.reduce((acc, item) => {
+      acc[item.id] = item.status;
+      return acc;
+    }, {})
+  );
+
+  const debounceRef = useRef();
+
+  // Handler para ese estado
+  const handleItemStatusChange = (itemId, newStatus) => {
+    setItemStatuses((prev) => ({
+      ...prev,
+      [itemId]: newStatus,
+    }));
+
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const response = await fetch(
+          `/api/order-items/${itemId}/status`,
+          patchOptions({ status: newStatus })
+        );
+        const result = await response.json();
+        if (!result.success) {
+          setItemStatuses((prev) => ({
+            ...prev,
+            [itemId]: order.order_items.find((item) => item.id === itemId).status,
+          }));
+          alert(result.error || "No se pudo actualizar el estado del producto");
+        } else {
+          if (onRefresh) onRefresh(); // llamando onRefresh
+        }
+      } catch (error) {
+        setItemStatuses((prev) => ({
+          ...prev,
+          [itemId]: order.order_items.find((item) => item.id === itemId).status,
+        }));
+        alert("Error de red al actualizar el estado del producto");
+      }
+    }, 500); // Espera 500ms después del último cambio
+  };
 
   // Función para formatear precio
   const formatPrice = (price) => {
@@ -36,6 +82,28 @@ export function OrderCard({ order }) {
       Garantía: "bg-orange-100 text-orange-700",
     };
     return colors[status] || "bg-gray-100 text-gray-700";
+  };
+
+  const handleOrderStatusChange = async (e) => {
+    const newStatus = e.target.value;
+    setOrderStatus(newStatus);
+
+    try {
+      const response = await fetch(
+        `/api/orders/${order.id}/status`,
+        patchOptions({ status: newStatus })
+      );
+      const result = await response.json();
+      if (!result.success) {
+        setOrderStatus(order.status);
+        alert(result.error || "No se pudo actualizar el estado");
+      } else {
+        if (onRefresh) onRefresh(); // Llamando onRefresh
+      }
+    } catch (error) {
+      setOrderStatus(order.status);
+      alert("Error de red al actualizar el estado");
+    }
   };
 
   return (
@@ -85,15 +153,16 @@ export function OrderCard({ order }) {
               <div className="flex flex-col items-end gap-2">
                 <span
                   className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                    order.status
+                    orderStatus
                   )}`}
                 >
-                  {order.status}
+                  {orderStatus}
                 </span>
 
                 {/* Select para cambiar estado del pedido */}
                 <select
-                  defaultValue={order.status}
+                  value={orderStatus}
+                  onChange={handleOrderStatusChange}
                   className="text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   onClick={(e) => e.stopPropagation()}
                 >
@@ -209,7 +278,8 @@ export function OrderCard({ order }) {
 
                       {/* Select para cambiar estado del item */}
                       <select
-                        defaultValue={item.status}
+                        value={itemStatuses[item.id]}
+                        onChange={(e) => handleItemStatusChange(item.id, e.target.value)}
                         className="text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
                         <option value="Enviado">Enviado</option>
