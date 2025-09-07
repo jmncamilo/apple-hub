@@ -82,9 +82,9 @@ export default function Login() {
               <p className={styles.pLikeLink}>¿No puedes iniciar sesión?</p>
             </div>
           </div>
+          {visibleError && <ErrorMessage message={'¡Credenciales inválidas! Verifíca los campos o solicita acceso.'} />}
         </div>
       )}
-      {visibleError && <ErrorMessage message={'¡Credenciales inválidas! Verifíca los campos o solicita acceso.'} />}
     </>
   );
 }

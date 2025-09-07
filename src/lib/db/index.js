@@ -1,4 +1,6 @@
 import { Pool } from 'pg';
+import dotenv from "dotenv";
+dotenv.config({ path: ".env.local" }); // Solo afecta scripts, Next.js lo ignora
 
 // Pool superusuario de postgres por defecto
 export const defaultPool = new Pool({
