@@ -250,16 +250,16 @@ AFTER UPDATE ON order_items
 FOR EACH ROW
 EXECUTE FUNCTION insert_warranty();
 
--- Probando
-    -- Actualizar un order_item existente a status 'Garantía'
-UPDATE order_items
-SET status = 'Garantía'
-WHERE id = 1;
+    -- Probando
+        -- Actualizar un order_item existente a status 'Garantía'
+    UPDATE order_items
+    SET status = 'Garantía'
+    WHERE id = 1;
 
-    -- Verificando inserciones
-SELECT * FROM order_items;
-SELECT * FROM products;
-SELECT * FROM warranties;
+        -- Verificando inserciones
+    SELECT * FROM order_items;
+    SELECT * FROM products;
+    SELECT * FROM warranties;
 
 
 /* ~^~^~^~^~^~^~^~^~^~ TRIGGER Y FUNCIÓN PARA INSERTAR EN TABLA DEVOLUCIONES (RETURNS) ~^~^~^~^~^~^~^~^~^~ */
@@ -291,21 +291,23 @@ AFTER UPDATE ON order_items
 FOR EACH ROW
 EXECUTE FUNCTION insert_return();
 
--- Probando
-    -- Actualizar un order_item a status 'Devuelto'
-UPDATE order_items
-SET status = 'Devuelto'
-WHERE id = 1;
+    -- Probando
+        -- Actualizar un order_item a status 'Devuelto'
+    UPDATE order_items
+    SET status = 'Devuelto'
+    WHERE id = 1;
 
-    -- Actualizar un order_item a status 'Cancelado'
-UPDATE order_items
-SET status = 'Cancelado'
-WHERE id = 1;
+        -- Actualizar un order_item a status 'Cancelado'
+    UPDATE order_items
+    SET status = 'Cancelado'
+    WHERE id = 1;
 
-    -- Verificando inserciones
-SELECT * FROM returns;
-SELECT * FROM order_items;
-SELECT * FROM products;
+        -- Verificando inserciones
+    SELECT * FROM returns;
+    SELECT * FROM order_items;
+    SELECT * FROM products;
+
+
 
 
 /* ───♡───────────────────────── INSERTANDO DATOS EN TABLAS, TESTEANDO Y UNIENDO ─────────────────────────♡─── */

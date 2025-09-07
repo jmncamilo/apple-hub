@@ -15,6 +15,6 @@ async function createUser(name, email, password, role = "empleado") {
   console.log("Usuario creado:", email);
 }
 
-createUser("Empleado Uno", "empleado@gmail.com", "empleadonuevo", "empleado")
+createUser("Usuario Empleado", "empleado@gmail.com", "empleado", "empleado")
   .then(() => process.exit())
   .catch(err => { console.error(err); process.exit(1); });
