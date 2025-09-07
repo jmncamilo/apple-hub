@@ -226,6 +226,86 @@ FOR EACH ROW
 EXECUTE FUNCTION updating_stock();
 
 
+/* ~^~^~^~^~^~^~^~^~^~ TRIGGER Y FUNCIÓN PARA INSERTAR EN TABLA GARANTÍAS (WARRANTIES) ~^~^~^~^~^~^~^~^~^~ */
+CREATE OR REPLACE FUNCTION insert_warranty()
+    RETURNS TRIGGER
+    LANGUAGE plpgsql
+AS $$
+    BEGIN
+        -- Verificar si el status cambió a 'Garantía' y antes no era 'Garantía'
+        IF NEW.status = 'Garantía' AND (OLD.status IS NULL OR OLD.status != 'Garantía') THEN
+            -- Verificar que no existe ya una garantía para este order_item
+            IF NOT EXISTS (SELECT 1 FROM warranties WHERE order_item_id = NEW.id) THEN
+                INSERT INTO warranties (order_item_id)
+                VALUES (NEW.id);
+            END IF;
+        END IF;
+
+        RETURN NEW;
+    END;
+$$;
+
+CREATE TRIGGER trigger_insert_warranty
+AFTER UPDATE ON order_items
+FOR EACH ROW
+EXECUTE FUNCTION insert_warranty();
+
+-- Probando
+    -- Actualizar un order_item existente a status 'Garantía'
+UPDATE order_items
+SET status = 'Garantía'
+WHERE id = 1;
+
+    -- Verificando inserciones
+SELECT * FROM order_items;
+SELECT * FROM products;
+SELECT * FROM warranties;
+
+
+/* ~^~^~^~^~^~^~^~^~^~ TRIGGER Y FUNCIÓN PARA INSERTAR EN TABLA DEVOLUCIONES (RETURNS) ~^~^~^~^~^~^~^~^~^~ */
+CREATE OR REPLACE FUNCTION insert_return()
+    RETURNS TRIGGER
+    LANGUAGE plpgsql
+AS $$
+    BEGIN
+        -- Verificar si el status cambió a 'Devuelto' o 'Cancelado' y antes no era ninguno de estos
+        IF NEW.status IN ('Devuelto', 'Cancelado')
+            AND (OLD.status IS NULL OR OLD.status NOT IN ('Devuelto', 'Cancelado')) THEN
+            -- Verificar que no existe ya una devolución para este order_item
+            IF NOT EXISTS (SELECT 1 FROM returns WHERE order_item_id = NEW.id) THEN
+                INSERT INTO returns (order_item_id, return_reason)
+                VALUES (NEW.id,
+                        CASE
+                            WHEN NEW.status = 'Cancelado' THEN 'Cancelación de pedido'
+                            WHEN NEW.status = 'Devuelto' THEN 'Producto devuelto'
+                            END);
+            END IF;
+        END IF;
+
+        RETURN NEW;
+    END;
+$$;
+
+CREATE TRIGGER trigger_insert_return
+AFTER UPDATE ON order_items
+FOR EACH ROW
+EXECUTE FUNCTION insert_return();
+
+-- Probando
+    -- Actualizar un order_item a status 'Devuelto'
+UPDATE order_items
+SET status = 'Devuelto'
+WHERE id = 1;
+
+    -- Actualizar un order_item a status 'Cancelado'
+UPDATE order_items
+SET status = 'Cancelado'
+WHERE id = 1;
+
+    -- Verificando inserciones
+SELECT * FROM returns;
+SELECT * FROM order_items;
+SELECT * FROM products;
 
 
 /* ───♡───────────────────────── INSERTANDO DATOS EN TABLAS, TESTEANDO Y UNIENDO ─────────────────────────♡─── */
@@ -331,82 +411,65 @@ ORDER BY total_spent DESC;
 
 
 
-/* ~^~^~^~^~^~^~^~^~^~ TRIGGER Y FUNCIÓN PARA INSERTAR EN TABLA GARANTÍAS (WARRANTIES) ~^~^~^~^~^~^~^~^~^~ */
-CREATE OR REPLACE FUNCTION insert_warranty()
-    RETURNS TRIGGER
-    LANGUAGE plpgsql
-AS $$
-    BEGIN
-        -- Verificar si el status cambió a 'Garantía' y antes no era 'Garantía'
-        IF NEW.status = 'Garantía' AND (OLD.status IS NULL OR OLD.status != 'Garantía') THEN
-            -- Verificar que no existe ya una garantía para este order_item
-            IF NOT EXISTS (SELECT 1 FROM warranties WHERE order_item_id = NEW.id) THEN
-                INSERT INTO warranties (order_item_id)
-                VALUES (NEW.id);
-            END IF;
-        END IF;
+/* ───♡───────────────────────── ROLES ─────────────────────────♡─── */
+-- 1. Crear Roles
+    -- Rol admin: superusuario, puede hacer el crud completo y tiene acceso total como el de postgres
+CREATE ROLE admin_role WITH LOGIN SUPERUSER PASSWORD 'admin2025';
 
-        RETURN NEW;
-    END;
-$$;
+    -- Rol empleado: no puede borrar, pero puede hacer SELECT, INSERT, UPDATE, ejecutar funciones y procedimientos
+CREATE ROLE employee_role WITH LOGIN PASSWORD 'employee2025';
 
-CREATE TRIGGER trigger_insert_warranty
-AFTER UPDATE ON order_items
-FOR EACH ROW
-EXECUTE FUNCTION insert_warranty();
 
--- Probando
-    -- Actualizar un order_item existente a status 'Garantía'
-UPDATE order_items
-SET status = 'Garantía'
-WHERE id = 1;
+-- 2. Crear Usuarios y Asignar Roles
+    -- Usuario admin
+CREATE USER admin_user WITH PASSWORD 'admin2025';
+GRANT admin_role TO admin_user;
 
-    -- Verificando inserciones
-SELECT * FROM order_items;
-SELECT * FROM products;
-SELECT * FROM warranties;
+    -- Usuario empleado
+CREATE USER employee_user WITH PASSWORD 'employee2025';
+GRANT employee_role TO employee_user;
 
-/* ~^~^~^~^~^~^~^~^~^~ TRIGGER Y FUNCIÓN PARA INSERTAR EN TABLA DEVOLUCIONES (RETURNS) ~^~^~^~^~^~^~^~^~^~ */
-CREATE OR REPLACE FUNCTION insert_return()
-    RETURNS TRIGGER
-    LANGUAGE plpgsql
-AS $$
-    BEGIN
-        -- Verificar si el status cambió a 'Devuelto' o 'Cancelado' y antes no era ninguno de estos
-        IF NEW.status IN ('Devuelto', 'Cancelado')
-            AND (OLD.status IS NULL OR OLD.status NOT IN ('Devuelto', 'Cancelado')) THEN
-            -- Verificar que no existe ya una devolución para este order_item
-            IF NOT EXISTS (SELECT 1 FROM returns WHERE order_item_id = NEW.id) THEN
-                INSERT INTO returns (order_item_id, return_reason)
-                VALUES (NEW.id,
-                        CASE
-                            WHEN NEW.status = 'Cancelado' THEN 'Cancelación de pedido'
-                            WHEN NEW.status = 'Devuelto' THEN 'Producto devuelto'
-                            END);
-            END IF;
-        END IF;
 
-        RETURN NEW;
-    END;
-$$;
+-- 3. Asignar Todos Los Permisos al Rol de Administrador
+    -- Permitir acceso total en todas las tablas, funciones y procedimientos
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO admin_role;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO admin_role;
+GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO admin_role;
+GRANT ALL PRIVILEGES ON ALL PROCEDURES IN SCHEMA public TO admin_role;
 
-CREATE TRIGGER trigger_insert_return
-AFTER UPDATE ON order_items
-FOR EACH ROW
-EXECUTE FUNCTION insert_return();
 
--- Probando
-    -- Actualizar un order_item a status 'Devuelto'
-UPDATE order_items
-SET status = 'Devuelto'
-WHERE id = 1;
+-- 4. Asignar Permisos al Rol de Empleado
+    -- Permitir SELECT, INSERT, UPDATE en todas las tablas
+GRANT SELECT, INSERT, UPDATE ON ALL TABLES IN SCHEMA public TO employee_role;
 
-    -- Actualizar un order_item a status 'Cancelado'
-UPDATE order_items
-SET status = 'Cancelado'
-WHERE id = 1;
+    -- Permitir uso de secuencias (para SERIAL)
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO employee_role;
 
-    -- Verificando inserciones
-SELECT * FROM returns;
-SELECT * FROM order_items;
-SELECT * FROM products;
+    -- Permitir ejecutar funciones y procedimientos
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO employee_role;
+GRANT EXECUTE ON ALL PROCEDURES IN SCHEMA public TO employee_role;
+
+    -- Denegar DELETE en todas las tablas
+REVOKE DELETE ON ALL TABLES IN SCHEMA public FROM employee_role;
+
+
+-- 5. Permisos Para Futuras Tablas
+    -- Para que los permisos se apliquen automáticamente a nuevas tablas
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+    GRANT SELECT, INSERT, UPDATE ON TABLES TO employee_role;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+    GRANT ALL PRIVILEGES ON TABLES TO admin_role;
+
+
+-- ----------------------------------------------------------------------------
+
+
+-- Testing para comprobar que no hay DELETE con los permisos de empleado
+DELETE FROM users WHERE id = 3;
+    -- Pero si hace INSERT
+INSERT INTO users (name, email, password, role)
+VALUES ('Testing', 'testing@email.com', '12345', 'admin');
+    -- Y hace UPDATE
+UPDATE users SET name = 'Cambio de Nombre' WHERE id = 3;
+    -- Y SELECT
+SELECT * FROM users;

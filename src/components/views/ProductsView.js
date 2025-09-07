@@ -68,7 +68,7 @@ export function ProductsContainer() {
       <div className="flex-1 overflow-auto p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {data?.products?.map((product) => (
-            <ProductCard key={product.id} product={product} onRefresh={onRefresh} />
+            <ProductCard key={product.id} product={product} onRefresh={onRefresh} role={data?.role} />
           ))}
         </div>
       </div>

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { ProductForm } from '@/components/forms/ProductForm';
 import { deleteOptions } from '@/lib/utils/optionsFetch';
 
-export function ProductCard({ product, onRefresh }) {
+export function ProductCard({ product, onRefresh, role }) {
   // Manejando el modal para borrar el producto
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
@@ -146,8 +146,10 @@ export function ProductCard({ product, onRefresh }) {
               Editar
             </button>
             <button
+              disabled={role !== "admin"}
               onClick={() => setShowDeleteModal(true)}
-              className="w-full !bg-red-400 hover:!bg-red-500 text-white !py-1 !px-2 rounded-md !text-xs font-medium transition-colors duration-200 !border-0 !outline-none focus:!outline-none"
+              className={`w-full !bg-red-400 hover:!bg-red-500 text-white !py-1 !px-2 rounded-md !text-xs font-medium transition-colors duration-200 !border-0 !outline-none focus:!outline-none
+              ${role !== "admin" ? "opacity-50 !cursor-not-allowed" : ""}`}
             >
               Eliminar
             </button>

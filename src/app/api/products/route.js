@@ -5,11 +5,42 @@ import { castToDecimal, castToInt } from "@/lib/utils/castFromStrings";
 import { validateFields } from "@/lib/utils/dictionaries/dicFunctionValidators";
 import { validateParams } from "@/lib/utils/validateParams";
 import { omitFields } from "@/lib/utils/omitFields";
+import jwt from "jsonwebtoken";
 
-export async function GET() {
+const JWT_SECRET = process.env.JWT_SECRET || "Stun.232323";
+
+// export async function GET() {
+//   try {
+//     const result = await defaultPool.query("SELECT * FROM products ORDER BY created_at DESC");
+//     return NextResponse.json({ products: result.rows });
+//   } catch (error) {
+//     console.error("Error al consultar productos: ", error);
+//     return NextResponse.json(
+//       { error: "Error interno del servidor..." },
+//       { status: 500 }
+//     );
+//   }
+// }
+
+export async function GET(request) {
   try {
+    // Extrayendo el token de la cookie y seteando el rol
+    const token = request.cookies.get("token")?.value;
+    let role = null;
+    if (token) {
+      try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        role = decoded.role;
+      } catch {
+        role = null;
+      }
+    }
+
+    // Ejecutando la consulta
     const result = await defaultPool.query("SELECT * FROM products ORDER BY created_at DESC");
-    return NextResponse.json({ products: result.rows });
+
+    return NextResponse.json({ products: result.rows, role });
+    
   } catch (error) {
     console.error("Error al consultar productos: ", error);
     return NextResponse.json(
@@ -106,7 +137,7 @@ export async function PATCH(request) {
     // Omitiendo campos que no deben actualizarse
     const fields = omitFields(rawFields, ["created_at", "updated_at"]);
 
-    // Validar que haya al menos un campo para actualizar
+    // Validando que haya al menos un campo para actualizar
     if (Object.keys(fields).length === 0) {
       return NextResponse.json(
         { error: "No se enviaron campos para actualizar." },
