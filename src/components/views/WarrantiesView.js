@@ -1,9 +1,27 @@
 "use client";
 import Image from 'next/image';
 import { WarrantyCard } from '../cards/WarrantyCard';
-import warranties from '@/lib/random/mockApiWarranties';
+import { useEffect, useState } from "react";
+import Loader from "../common/Loader";
 
 export function WarrantiesView({ onClose }) {
+  const [warranties, setWarranties] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchWarranties() {
+      setIsLoading(true);
+      try {
+        const res = await fetch("/api/warranties");
+        const data = await res.json();
+        setWarranties(data.warranties || []);
+      } catch (error) {
+        setWarranties([]);
+      }
+      setIsLoading(false);
+    }
+    fetchWarranties();
+  }, []);
 
   return (
     <div className="w-full h-full bg-gray-50 flex flex-col">
@@ -49,9 +67,13 @@ export function WarrantiesView({ onClose }) {
             {/* Línea vertical del timeline */}
             <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gray-300"></div>
 
-            {warranties.map(warrantyItem => <WarrantyCard key={warrantyItem.id} warrantyItem={warrantyItem}/>)}
-
-            {warranties.length === 0 && (
+            {isLoading ? (
+              <Loader isVisible={true} />
+            ) : warranties.length > 0 ? (
+              warranties.map(warrantyItem => (
+                <WarrantyCard key={warrantyItem.id} warrantyItem={warrantyItem} />
+              ))
+            ) : (
               <div className="text-center py-16">
                 <div className="text-6xl mb-4">🛡️</div>
                 <h3 className="text-xl font-semibold text-gray-700 mb-2">No hay garantías registradas</h3>
@@ -61,6 +83,7 @@ export function WarrantiesView({ onClose }) {
           </div>
         </div>
       </div>
+      <Loader isVisible={isLoading} />
     </div>
   );
 }

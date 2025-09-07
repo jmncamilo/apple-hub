@@ -2,16 +2,40 @@
 import { useState } from 'react';
 
 // Componente para editar solo return_reason y notes (solo maquetación)
-export function EditReturnForm({ returnItem, onSave, onCancel }) {
+export function EditReturnForm({ returnItem, onSave, onCancel, onRefresh }) {
   const [formData, setFormData] = useState({
     return_reason: returnItem.return_reason || "",
     notes: returnItem.notes || "",
   });
+  const [isSaving, setIsSaving] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Por ahora solo cierra el formulario
-    onSave();
+    setIsSaving(true);
+
+    try {
+      const response = await fetch("/api/returns", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: returnItem.id,
+          return_reason: formData.return_reason,
+          notes: formData.notes,
+        }),
+      });
+      const result = await response.json();
+
+      if (result.success) {
+        alert("Devolución actualizada correctamente");
+        onRefresh();
+        onSave();
+      } else {
+        alert(result.error || "No se pudo actualizar la devolución");
+      }
+    } catch (error) {
+      alert("Error de red al actualizar la devolución");
+    }
+    setIsSaving(false);
   };
 
   return (
@@ -61,7 +85,7 @@ export function EditReturnForm({ returnItem, onSave, onCancel }) {
           type="submit"
           className="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors"
         >
-          Guardar
+          {isSaving ? "Guardando..." : "Guardar"}
         </button>
       </div>
     </form>

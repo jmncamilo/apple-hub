@@ -4,9 +4,9 @@ import { useRouter } from "next/navigation"; // ← Correcto para App Router
 export function LogoutConfirmation() {
   const router = useRouter();
 
-  const handleConfirmLogout = () => {
-    console.log('Cerrando sesión...');
-    // Aquí se maneja la lógica de cerrar sesión
+  const handleConfirmLogout = async () => {
+    await fetch("/api/logout", { method: "POST" });
+    router.push("/"); // Redirige al login
   };
 
   const handleCancel = () => {

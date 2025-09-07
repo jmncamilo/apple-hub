@@ -129,7 +129,7 @@ export default function DashboardOrders() {
 
       {activeModal === "returns" && (
         <div className="absolute inset-0 bg-white z-50">
-          <ReturnsView onClose={() => setActiveModal(null)} />
+          <ReturnsView onClose={() => setActiveModal(null)} onRefresh={onRefresh} refreshUrl={refreshUrl} />
         </div>
       )}
 

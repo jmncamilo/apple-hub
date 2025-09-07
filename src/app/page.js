@@ -1,73 +1,90 @@
 "use client";
 import styles from "./login.module.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useForm } from "@/hooks/useForm";
 import { postOptions } from "@/lib/utils/optionsFetch";
 import { useFetchAction } from "@/hooks/useFetchAction";
 import { useRouter } from "next/navigation";
 import ErrorMessage from "@/components/common/ErrorMessage";
+import Loader from "@/components/common/Loader";
 
 export default function Login() {
-  // Estado para manejar el mensaje de error
   const [visibleError, setVisibleError] = useState(false);
-
-  // Invocando useRouter
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const router = useRouter();
 
-  // Desestructurando los estados y funciones necesarias del custom hook
-  const { form, handleChange } = useForm({ email: "", password: "" });
+  useEffect(() => {
+    async function checkAuth() {
+      setIsCheckingAuth(true);
+      try {
+        const res = await fetch("/api/customers");
+        if (res.status === 200) {
+          router.push("/dashboard");
+        }
+      } catch (err) {
+        // No autenticado, no hace nada
+      } finally {
+        setIsCheckingAuth(false);
+      }
+    }
+    checkAuth();
+  }, [router]);
 
-  // Desestructurando el useFetchAction
+  const { form, handleChange } = useForm({ email: "", password: "" });
   const { request } = useFetchAction();
 
-  // Función manejadora del click para enviar petición POST y validar el login
   const onClickLogin = async () => {
     const result = await request("/api/login", postOptions(form));
+    console.log("Respuesta login:", result);
 
     if (result?.success) {
       router.push("/dashboard");
       console.log('Autorizado...');
     } else {
-      // alert("Error de credenciales");
       setVisibleError(true);
     }
   };
 
   return (
-    <div className={styles.mainWrapper}>
-      <div className={styles.loginBox}>
-        <div className={styles.marginLoginBox}>
-          <div className={styles.logoApp}>
-            <Image
-              src="/applehub-logo.png"
-              alt="Logo de la aplicación"
-              width={155}
-              height={96}
-            />
+    <>
+      <Loader isVisible={isCheckingAuth} />
+      {!isCheckingAuth && (
+        <div className={styles.mainWrapper}>
+          <div className={styles.loginBox}>
+            <div className={styles.marginLoginBox}>
+              <div className={styles.logoApp}>
+                <Image
+                  src="/applehub-logo.png"
+                  alt="Logo de la aplicación"
+                  width={155}
+                  height={96}
+                />
+              </div>
+              <h1 className={styles.titleH1}>Iniciar Sesión</h1>
+              <input
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                className={styles.inputLogin}
+                type="text"
+                placeholder="Correo electrónico"
+              />
+              <input
+                name="password"
+                value={form.password}
+                onChange={handleChange}
+                className={styles.inputLogin}
+                type="password"
+                placeholder="Contraseña"
+              />
+              <button onClick={onClickLogin}>Ingresar</button>
+              <p className={styles.pLikeLink}>¿No puedes iniciar sesión?</p>
+            </div>
           </div>
-          <h1 className={styles.titleH1}>Iniciar Sesión</h1>
-          <input
-            name="email"
-            value={form.email}
-            onChange={handleChange}
-            className={styles.inputLogin}
-            type="text"
-            placeholder="Correo electrónico"
-          />
-          <input
-            name="password"
-            value={form.password}
-            onChange={handleChange}
-            className={styles.inputLogin}
-            type="password"
-            placeholder="Contraseña"
-          />
-          <button onClick={onClickLogin}>Ingresar</button>
-          <p className={styles.pLikeLink}>¿No puedes iniciar sesión?</p>
         </div>
-      </div>
+      )}
       {visibleError && <ErrorMessage message={'¡Credenciales inválidas! Verifíca los campos o solicita acceso.'} />}
-    </div>
+    </>
   );
 }
