@@ -1,8 +1,9 @@
 import Image from 'next/image';
 import { useState } from 'react';
 import { ProductForm } from '@/components/forms/ProductForm';
+import { deleteOptions } from '@/lib/utils/optionsFetch';
 
-export function ProductCard({ product }) {
+export function ProductCard({ product, onRefresh }) {
   // Manejando el modal para borrar el producto
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
@@ -11,13 +12,12 @@ export function ProductCard({ product }) {
   const closeModalForm = () => {
     setShowProductForm(false);
   };
-  
 
   // Función para formatear el precio
   const formatPrice = (price) => {
-    return new Intl.NumberFormat('es-CO', {
-      style: 'currency',
-      currency: 'COP',
+    return new Intl.NumberFormat("es-CO", {
+      style: "currency",
+      currency: "COP",
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(price);
@@ -25,32 +25,46 @@ export function ProductCard({ product }) {
 
   // Función para determinar el estado del stock
   const getStockStatus = (quantity) => {
-    if (quantity === 0) return { text: 'Agotado', color: 'bg-red-100 text-red-700' };
-    if (quantity <= 10) return { text: 'Poco stock', color: 'bg-yellow-100 text-yellow-700' };
-    return { text: 'Disponible', color: 'bg-green-100 text-green-700' };
+    if (quantity === 0)
+      return { text: "Agotado", color: "bg-red-100 text-red-700" };
+    if (quantity <= 7)
+      return { text: "Poco stock", color: "bg-yellow-100 text-yellow-700" };
+    return { text: "Disponible", color: "bg-green-100 text-green-700" };
   };
 
   // Función para obtener imagen por categoría
   const getCategoryImage = (category) => {
     // Mapeando categorías a imágenes de public (placeholder)
     const imageMap = {
-      'iPhone': '/products/iPhone.png',
-      'Mac': '/products/mac.png',
-      'iPad': '/products/iPad.png',
-      'Accesorios': '/products/accesories.png',
-      'AirPods': '/products/airpods.png',
-      'Apple Home': '/products/apple-home.png',
-      'Watch': '/products/watch.png'
+      iPhone: "/products/iPhone.png",
+      Mac: "/products/mac.png",
+      iPad: "/products/iPad.png",
+      Accesorios: "/products/accesories.png",
+      AirPods: "/products/airpods.png",
+      "Apple Home": "/products/apple-home.png",
+      Watch: "/products/watch.png",
     };
-    return imageMap[category] || '/products/default-logo.png';
+    return imageMap[category] || "/products/default-logo.png";
   };
 
-  // Función para manejar eliminación
-  const handleDeleteProduct = () => {
-    // Aquí iría la lógica de eliminación
-    console.log('Eliminando producto:', product.id);
-    setShowDeleteModal(false);
-    // Llamar API de eliminación
+  // Función para manejar eliminación del producto
+  const handleDeleteProduct = async () => {
+    try {
+      const response = await fetch("/api/products", deleteOptions({ id: product.id }));
+      const data = await response.json();
+
+      if (data.success) {
+        // alert("Producto eliminado correctamente.");
+        if (onRefresh) onRefresh();
+      } else {
+        alert(data.error || "No se pudo eliminar el producto.");
+      }
+    } catch (error) {
+      alert("Error al eliminar el producto.");
+      console.error(error);
+    } finally {
+      setShowDeleteModal(false);
+    }
   };
 
   const stockStatus = getStockStatus(product.stock_quantity);
@@ -60,7 +74,7 @@ export function ProductCard({ product }) {
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200 overflow-hidden">
         {/* Imagen del producto */}
         <div className="relative h-56 bg-gray-100">
-          <Image 
+          <Image
             src={getCategoryImage(product.category)}
             alt={product.product_name}
             fill
@@ -70,7 +84,9 @@ export function ProductCard({ product }) {
           />
           {/* Badge de stock superpuesto */}
           <div className="absolute top-2 right-2 z-10">
-            <span className={`px-2 py-1 rounded-full text-xs font-medium ${stockStatus.color}`}>
+            <span
+              className={`px-2 py-1 rounded-full text-xs font-medium ${stockStatus.color}`}
+            >
               {stockStatus.text}
             </span>
           </div>
@@ -123,13 +139,13 @@ export function ProductCard({ product }) {
         {/* Footer con acciones */}
         <div className="px-4 py-2 pb-3 bg-gray-50 border-t border-gray-100">
           <div className="flex flex-col gap-1">
-            <button 
+            <button
               onClick={() => setShowProductForm(true)}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white !py-1 !px-2 rounded-md !text-xs font-medium transition-colors duration-200"
             >
               Editar
             </button>
-            <button 
+            <button
               onClick={() => setShowDeleteModal(true)}
               className="w-full !bg-red-400 hover:!bg-red-500 text-white !py-1 !px-2 rounded-md !text-xs font-medium transition-colors duration-200 !border-0 !outline-none focus:!outline-none"
             >
@@ -143,18 +159,30 @@ export function ProductCard({ product }) {
       {showDeleteModal && (
         <div className="!fixed !inset-0 !z-50 !flex !items-center !justify-center">
           {/* Backdrop con blur y saturación */}
-          <div 
+          <div
             className="!absolute !inset-0 bg-black/20 backdrop-blur-md backdrop-saturate-150"
             onClick={() => setShowDeleteModal(false)}
           ></div>
-          
+
           {/* Modal para eliminar */}
           <div className="!relative !bg-white/95 !backdrop-blur-xl !rounded-2xl !shadow-2xl !border !border-white/20 !p-8 !mx-4 !max-w-lg !w-full !transform !transition-all !duration-300 !ease-out !min-h-fit !h-auto">
             {/* Icono de advertencia */}
             <div className="!flex !justify-center !mb-6">
               <div className="!w-20 !h-20 !bg-red-100 !rounded-full !flex !items-center !justify-center">
-                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <svg
+                  width="36"
+                  height="36"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
+                    stroke="#ef4444"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
               </div>
             </div>
@@ -166,7 +194,9 @@ export function ProductCard({ product }) {
 
             {/* Mensaje */}
             <p className="!text-gray-600 !text-center !mb-8 !leading-relaxed !text-base !px-2">
-              ¿Estás seguro de que deseas eliminar <strong>{product.product_name}</strong>? Esta acción no se puede deshacer.
+              ¿Estás seguro de que deseas eliminar{" "}
+              <strong>{product.product_name}</strong>? Esta acción no se puede
+              deshacer.
             </p>
 
             {/* Botones */}
@@ -188,11 +218,12 @@ export function ProductCard({ product }) {
         </div>
       )}
 
-      {/* Modal de formulario para editar producto */}
-      <ProductForm 
-        isOpen={showProductForm} 
-        onClose={closeModalForm} 
+      {/* Modal del formulario para editar producto */}
+      <ProductForm
+        isOpen={showProductForm}
+        onClose={closeModalForm}
         product={product}
+        onRefresh={onRefresh}
       />
     </>
   );

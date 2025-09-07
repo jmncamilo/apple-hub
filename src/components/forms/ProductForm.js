@@ -1,4 +1,42 @@
-export function ProductForm({ isOpen, onClose, product = null }) {
+"use client";
+import { useForm } from "@/hooks/useForm";
+import { initialProductValues } from "@/app/dashboard/products/initialValues";
+import { handlerHttpProducts } from "@/app/dashboard/products/handlerHttp";
+
+export function ProductForm({ isOpen, onClose, product = null, onRefresh }) {
+  // Desestructurando lo que necesitamos del custom hook para manejar el form controlado
+    const { form, handleChange } = useForm(product ?? initialProductValues);
+
+  // Manejando la lógica de inserción o actualización según corresponde si es form de registro o de actualización
+  const clickSubmit = async () => {
+    // Validar que todos los campos estén completos
+  for (const key of Object.keys(initialProductValues)) {
+    if (!form[key] && form[key] !== 0) {
+      return alert("Todos los campos son obligatorios.");
+    }
+  }
+
+  if (!product) {
+      // Lógica de inserción
+    const data = await handlerHttpProducts(form);
+    if (!data?.success) {
+      return alert(data?.error || '¡Error! Vuelve a intentarlo...');
+    }
+    alert('¡Producto creado!');
+    onRefresh();
+    onClose();
+  } else {
+      // Lógica de actualización
+    const data = await handlerHttpProducts(form, false);
+    if (!data?.success) {
+      return alert(data?.error || '¡Error! Vuelve a intentarlo...');
+    }
+    alert('¡Producto actualizado!');
+    onRefresh();
+    onClose();
+  }
+};
+
   // Categorías predefinidas
   const categories = [
     'iPhone',
@@ -50,8 +88,11 @@ export function ProductForm({ isOpen, onClose, product = null }) {
               Nombre del Producto
             </label>
             <input
+              name="product_name"
+              value={form.product_name}
+              onChange={handleChange}
               type="text"
-              defaultValue={product?.product_name || ''}
+              // defaultValue={product?.product_name || ''}
               className="!w-full !px-4 !py-2.5 !border !border-gray-300 !rounded-lg focus:!border-blue-500 focus:!outline-none focus:!ring-2 focus:!ring-blue-500/20 !transition-colors !text-gray-900"
               placeholder="Ej: iPhone 14 Pro"
             />
@@ -63,8 +104,11 @@ export function ProductForm({ isOpen, onClose, product = null }) {
               Código de Referencia
             </label>
             <input
+              name="reference_code"
+              value={form.reference_code}
+              onChange={handleChange}
               type="text"
-              defaultValue={product?.reference_code || ''}
+              // defaultValue={product?.reference_code || ''}
               className="!w-full !px-4 !py-2.5 !border !border-gray-300 !rounded-lg focus:!border-blue-500 focus:!outline-none focus:!ring-2 focus:!ring-blue-500/20 !transition-colors !text-gray-900"
               placeholder="Ej: AAPL-0023"
             />
@@ -78,10 +122,13 @@ export function ProductForm({ isOpen, onClose, product = null }) {
                 Categoría
               </label>
               <select
-                defaultValue={product?.category || ''}
+                name="category"
+                value={form.category}
+                onChange={handleChange}
+                // defaultValue={product?.category || ''}
                 className="!w-full !px-4 !py-2.5 !border !border-gray-300 !rounded-lg focus:!border-blue-500 focus:!outline-none focus:!ring-2 focus:!ring-blue-500/20 !transition-colors !text-gray-900"
               >
-                <option value="">Seleccionar categoría</option>
+                <option hidden value="">Seleccionar categoría</option>
                 {categories.map(cat => (
                   <option key={cat} value={cat}>{cat}</option>
                 ))}
@@ -94,12 +141,15 @@ export function ProductForm({ isOpen, onClose, product = null }) {
                 Precio (COP)
               </label>
               <input
+                name="price"
+                value={form.price}
+                onChange={handleChange}
                 type="number"
-                defaultValue={product?.price || ''}
+                // defaultValue={product?.price || ''}
                 min="0"
                 step="0.01"
                 className="!w-full !px-4 !py-2.5 !border !border-gray-300 !rounded-lg focus:!border-blue-500 focus:!outline-none focus:!ring-2 focus:!ring-blue-500/20 !transition-colors !text-gray-900"
-                placeholder="Ej: 4599000"
+                placeholder="Ej: 9500000"
               />
             </div>
           </div>
@@ -110,8 +160,11 @@ export function ProductForm({ isOpen, onClose, product = null }) {
               Stock Disponible
             </label>
             <input
+              name="stock_quantity"
+              value={form.stock_quantity}
+              onChange={handleChange}
               type="number"
-              defaultValue={product?.stock_quantity || ''}
+              // defaultValue={product?.stock_quantity || ''}
               min="0"
               className="!w-full !px-4 !py-2.5 !border !border-gray-300 !rounded-lg focus:!border-blue-500 focus:!outline-none focus:!ring-2 focus:!ring-blue-500/20 !transition-colors !text-gray-900"
               placeholder="Ej: 15"
@@ -124,7 +177,10 @@ export function ProductForm({ isOpen, onClose, product = null }) {
               Descripción
             </label>
             <textarea
-              defaultValue={product?.description || ''}
+              name="description"
+              value={form.description}
+              onChange={handleChange}
+              // defaultValue={product?.description || ''}
               rows={3}
               className="!w-full !px-4 !py-2.5 !border !border-gray-300 !rounded-lg focus:!border-blue-500 focus:!outline-none focus:!ring-2 focus:!ring-blue-500/20 !transition-colors !text-gray-900 !resize-none"
               placeholder="Describe el producto detalladamente..."
@@ -141,6 +197,7 @@ export function ProductForm({ isOpen, onClose, product = null }) {
             Cancelar
           </button>
           <button
+            onClick={clickSubmit}
             className="!px-5 !py-2.5 !text-white !rounded-lg !transition-colors !font-medium !text-sm"
           >
             {product ? 'Actualizar' : 'Crear'} Producto

@@ -104,7 +104,7 @@ const revenues = [
 
 export default revenues;
 
-// Este select traer esa data
+// Este select trae esa data
 /*
 SELECT 
     id,

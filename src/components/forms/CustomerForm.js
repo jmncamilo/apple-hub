@@ -1,4 +1,51 @@
-export function CustomerForm({ customer, registerForm = false, onClose, onSave }) {
+"use client";
+import { useForm } from "@/hooks/useForm";
+import { initialCustomerValues } from "@/app/dashboard/customers/initialValues";
+import { handlerHttp } from "@/app/dashboard/customers/handlerHttp"; 
+
+export function CustomerForm({ customer, registerForm = false, onClose, onSave, onRefresh }) {
+  // Desestructurando lo que necesitamos del custom hook para manejar el form controlado
+  const { form, handleChange } = useForm(customer ?? initialCustomerValues);
+
+  // Manejando la lógica de inserción o actualización según corresponde si es form de registro o de actualización
+  const clickSubmit = async () => {
+    if (
+      !form.nuip ||
+      !form.names ||
+      !form.lastnames ||
+      !form.email ||
+      !form.age ||
+      !form.gender ||
+      !form.address ||
+      !form.phone_number
+    ) {
+      return alert("Todos los campos son obligatorios.");
+    }
+
+    if(registerForm) {
+        // Lógica de inserción
+      const data = await handlerHttp(form);
+        // Verificando si la inserción fue válida
+      if (!data?.success) {
+        return alert(data?.error || '¡Error! Vuelve a intentarlo...');
+      }
+      alert('¡Usuario registrado!');
+      onRefresh();
+      onClose();
+
+    } else {
+      // Lógica de actualización
+      const data = await handlerHttp(form, false);
+        // Verificando si la actualización fue válida
+      if (!data?.success) {
+        return alert(data?.error || '¡Error! Vuelve a intentarlo...');
+      }
+      alert('¡Usuario actualizado!');
+      onRefresh();
+      onClose();
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black/30 backdrop-blur-lg flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -41,8 +88,11 @@ export function CustomerForm({ customer, registerForm = false, onClose, onSave }
                 Documento de Identidad
               </label>
               <input
-                type="text"
-                defaultValue={customer?.nuip ?? ''}
+                name="nuip"
+                value={form.nuip}
+                onChange={handleChange}
+                type="number"
+                // defaultValue={customer?.nuip ?? ''}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -53,8 +103,11 @@ export function CustomerForm({ customer, registerForm = false, onClose, onSave }
                 Nombres
               </label>
               <input
+                name="names"
+                value={form.names}
+                onChange={handleChange}
                 type="text"
-                defaultValue={customer?.names ?? ''}
+                // defaultValue={customer?.names ?? ''}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -65,8 +118,11 @@ export function CustomerForm({ customer, registerForm = false, onClose, onSave }
                 Apellidos
               </label>
               <input
+                name="lastnames"
+                value={form.lastnames}
+                onChange={handleChange}
                 type="text"
-                defaultValue={customer?.lastnames ?? ''}
+                // defaultValue={customer?.lastnames ?? ''}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -77,8 +133,11 @@ export function CustomerForm({ customer, registerForm = false, onClose, onSave }
                 Email
               </label>
               <input
+                name="email"
+                value={form.email}
+                onChange={handleChange}
                 type="email"
-                defaultValue={customer?.email ?? ''}
+                // defaultValue={customer?.email ?? ''}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -89,8 +148,13 @@ export function CustomerForm({ customer, registerForm = false, onClose, onSave }
                 Edad
               </label>
               <input
+                name="age"
+                value={form.age}
+                onChange={handleChange}
                 type="number"
-                defaultValue={customer?.age ?? ''}
+                min={16}
+                max={120}
+                // defaultValue={customer?.age ?? ''}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -101,7 +165,10 @@ export function CustomerForm({ customer, registerForm = false, onClose, onSave }
                 Género
               </label>
               <select
-                defaultValue={customer?.gender ?? ''}
+                name="gender"
+                value={form.gender}
+                onChange={handleChange}
+                // defaultValue={customer?.gender ?? ''}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent h-12"
               >
                 <option hidden value="">Seleccionar género</option>
@@ -116,8 +183,11 @@ export function CustomerForm({ customer, registerForm = false, onClose, onSave }
                 Teléfono
               </label>
               <input
+                name="phone_number"
+                value={form.phone_number}
+                onChange={handleChange}
                 type="tel"
-                defaultValue={customer?.phone_number ?? ''}
+                // defaultValue={customer?.phone_number ?? ''}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -128,7 +198,10 @@ export function CustomerForm({ customer, registerForm = false, onClose, onSave }
                 Dirección
               </label>
               <textarea
-                defaultValue={customer?.address ?? ''}
+                name="address"
+                value={form.address}
+                onChange={handleChange}
+                // defaultValue={customer?.address ?? ''}
                 rows="3"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
               />
@@ -143,7 +216,7 @@ export function CustomerForm({ customer, registerForm = false, onClose, onSave }
             >
               Cancelar
             </button>
-            <button onClick={onSave} className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200">
+            <button onClick={clickSubmit} className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200">
               {registerForm ? 'Registrar Cliente' : 'Guardar Cambios'}
             </button>
           </div>

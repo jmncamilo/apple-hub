@@ -1,14 +1,25 @@
 "use client";
 import { CustomerCard } from "@/components/cards/CustomerCard";
 import { CustomerForm } from "@/components/forms/CustomerForm";
+import Loader from "@/components/common/Loader";
 import { useState } from "react";
-import customers from "@/lib/random/mockApiCustomers";
+import { useFetch } from "@/hooks/useFetch";
 
 export default function DashboardUsers() {
+  // Usando estado para refrescar el fetch de los clientes
+  const [refreshUrl, setRefreshUrl] = useState(0);
+    // Función para setear valor y refrescar el fetch
+  const onRefresh = () => {
+    setRefreshUrl((prev) => prev + 1);
+  };
+
   // Contrlando el modal para editar el usuario
   const [isModalOpen, setIsModalOpen] = useState(false);
     // Función para cerrar el modal y pasar por prop a CustomerForm
   const closeModal = () => setIsModalOpen(false);
+
+  // Desestructurando el custom hook useFetch
+  const { data, error, isLoading } = useFetch(`/api/customers?upt=${refreshUrl}`);
 
   return (
     <div className="w-full h-full flex flex-col">
@@ -45,8 +56,8 @@ export default function DashboardUsers() {
       <div className="flex-1 overflow-auto bg-gray-50">
         <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {customers.map((customer) => (
-              <CustomerCard key={customer.id} customer={customer} />
+            {data?.customers?.map((customer) => (
+              <CustomerCard key={customer.id} customer={customer} onRefresh={onRefresh} />
             ))}
           </div>
         </div>
@@ -57,8 +68,12 @@ export default function DashboardUsers() {
         <CustomerForm
           onClose={closeModal}
           registerForm={true}
+          onRefresh={onRefresh}
         />
       )}
+
+      {/* Loader mostrándose o no... */}
+      <Loader isVisible={isLoading} />
     </div>
   );
 }

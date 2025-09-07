@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { CustomerForm } from "../forms/CustomerForm";
 
-export function CustomerCard({ customer }) {
+export function CustomerCard({ customer, onRefresh }) {
   // Contrlando el modal para editar el usuario
   const [isModalOpen, setIsModalOpen] = useState(false);
     // Funcion para cerrar el modal y pasar por prop a CustomerForm
@@ -90,8 +90,8 @@ export function CustomerCard({ customer }) {
         </button>
       </div>
 
-      {/* Modal */}
-      {isModalOpen && <CustomerForm customer={customer} onClose={closeModal} />}
+      {/* Modal para editar cliente */}
+      {isModalOpen && <CustomerForm customer={customer} onClose={closeModal} onRefresh={onRefresh} />}
     </>
   );
 }

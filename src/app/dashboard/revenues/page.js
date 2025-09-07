@@ -1,24 +1,8 @@
-import revenues from "@/lib/random/mockApiRevenues";
-
-export default function DashboardRevenues() {
-  // Separar datos de hoy vs históricos
-  const today = new Date().toISOString().split("T")[0];
-  const todayRevenues = revenues.filter(
-    (item) => item.created_at.split("T")[0] === today
-  );
-  const historicRevenues = revenues.filter(
-    (item) => item.created_at.split("T")[0] !== today
-  );
-
-  // Calcular totales
-  const todayTotal = todayRevenues.reduce(
-    (sum, item) => sum + item.subtotal,
-    0
-  );
-  const historicTotal = historicRevenues.reduce(
-    (sum, item) => sum + item.subtotal,
-    0
-  );
+export default async function DashboardRevenues() {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+  // Fetching de la data para mostrar en el front
+  const response = await fetch(`${baseUrl}/api/revenues`, { cache: "no-store" });
+  const { todayRevenues, historicRevenues, todayTotal, historicTotal } = await response.json();
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("es-CO", {
