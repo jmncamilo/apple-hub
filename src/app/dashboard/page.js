@@ -24,13 +24,18 @@ export default function DashboardHome() {
                   <p className="font-medium text-gray-700">Camilo Jiménez</p>
                 </div>
                 <div className="px-4 py-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">
-                  <p className="font-medium text-gray-700">Felipe Mora</p>
+                  <p className="font-medium text-gray-700">jmncamilo@gmail.com</p>
                 </div>
-                <div className="px-4 py-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">
-                  <p className="font-medium text-gray-700">
-                    Juan Esteban Aponte
-                  </p>
-                </div>
+                  <div className="group px-4 py-3 bg-[#5d4ee7] rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">
+                      <a
+                          href="https://github.com/jmncamilo/apple-hub"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-medium text-white group-hover:text-[#5d4ee7] transition-colors block"
+                      >
+                          Repositorio
+                      </a>
+                  </div>
               </div>
             </div>
           </div>

@@ -15,6 +15,7 @@ async function createUser(name, email, password, role = "empleado") {
   console.log("Usuario creado:", email);
 }
 
+// Ejecuta el script para crear un usuario de ejemplo; puedes modificar los valores según tus necesidades
 createUser("Usuario Empleado", "empleado@gmail.com", "empleado", "empleado")
   .then(() => process.exit())
   .catch(err => { console.error(err); process.exit(1); });
