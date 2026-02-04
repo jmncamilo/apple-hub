@@ -6,11 +6,11 @@ export function LogoutConfirmation() {
 
   const handleConfirmLogout = async () => {
     await fetch("/api/logout", { method: "POST" });
-    router.push("/"); // Redirige al login
+    // router.push("/"); // Redirige al login
+    window.location.href = "/"; // Recarga completa y redirige para eliminar el caché
   };
 
   const handleCancel = () => {
-    console.log('Cancelando...'); // para testing...
     router.push("/dashboard"); // redirige al home
   };
 

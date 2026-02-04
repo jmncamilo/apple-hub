@@ -20,6 +20,7 @@ export default function Login() {
       try {
         const res = await fetch("/api/customers");
         if (res.status === 200) {
+          router.refresh();
           router.push("/dashboard");
         }
       } catch (err) {
