@@ -13,7 +13,7 @@ export default function DashboardUsers() {
     setRefreshUrl((prev) => prev + 1);
   };
 
-  // Contrlando el modal para editar el usuario
+  // Controlando el modal para editar el usuario
   const [isModalOpen, setIsModalOpen] = useState(false);
     // Función para cerrar el modal y pasar por prop a CustomerForm
   const closeModal = () => setIsModalOpen(false);

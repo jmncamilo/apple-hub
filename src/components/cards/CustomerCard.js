@@ -3,9 +3,9 @@ import { useState } from "react";
 import { CustomerForm } from "../forms/CustomerForm";
 
 export function CustomerCard({ customer, onRefresh }) {
-  // Contrlando el modal para editar el usuario
+  // Controlando el modal para editar el usuario
   const [isModalOpen, setIsModalOpen] = useState(false);
-    // Funcion para cerrar el modal y pasar por prop a CustomerForm
+    // Función para cerrar el modal y pasar por prop a CustomerForm
   const closeModal = () => setIsModalOpen(false);
 
   return (
